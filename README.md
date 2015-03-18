@@ -1,4 +1,4 @@
-# EasyWebStart [![NPM version][npm-image]][npm-url]
+# EasyWebStart
 
 > An easy-to-use automated front-end setup.
 
