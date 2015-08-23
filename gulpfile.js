@@ -40,6 +40,9 @@ var
 	assetsFolder        = 'assets',
 	stdoutBuffer        = [],
 	lrStarted           = false,
+	angularApp			= false,
+	uglifyCore			= true,
+	uglifyViews			= true,
 	htmlminOptions      = {
 		removeComments:                true,
 		collapseWhitespace:            true,
@@ -441,7 +444,7 @@ gulp.task('scripts-main', ['hint-scripts', 'scripts-view', 'scripts-ie'], functi
 		.pipe(plugins.if(isProduction, plugins.concat('core-libs.js')))
 		.pipe(plugins.if(config.revisionCaching, plugins.rev()))
 		.pipe(plugins.if(isProduction, plugins.rename({extname: '.min.js'})))
-		.pipe(plugins.if(isProduction, plugins.uglify()))
+		.pipe(plugins.if(isProduction && config.uglifyCore==true, plugins.uglify()))
 		.pipe(gulp.dest(config.export_assets + '/' + assetsFolder + '/js'))
 		.on('end', updateBar)
 	;
@@ -456,7 +459,7 @@ gulp.task('scripts-view', function (cb) {
 		.pipe(plugins.if(config.revisionCaching, plugins.rev()))
 		.pipe(plugins.if(isProduction, plugins.rename({suffix: '.min'})))
 		.pipe(plugins.if(isProduction, plugins.stripDebug()))
-		.pipe(plugins.if(isProduction, plugins.uglify()))
+		.pipe(plugins.if(isProduction && config.uglifyViews==true, plugins.uglify()))
 		.pipe(gulp.dest(config.export_assets + '/' + assetsFolder + '/js'))
 	;
 });
@@ -520,6 +523,26 @@ gulp.task('images', function (cb) {
 		.pipe(plugins.if(isProduction, plugins.imagemin({ optimizationLevel: 3, progressive: true, interlaced: true })))
 		//.pipe(plugins.if(config.revisionCaching, plugins.rev()))
 		.pipe(gulp.dest(config.export_assets + '/' + assetsFolder + '/images'))
+		.pipe(plugins.if(lrStarted, browserSync.reload({stream:true})))
+	;
+});
+
+// APP ---------------------------------------------------------------------
+//	added support for copy App scripts
+
+gulp.task('appOther', function (cb) {
+	
+	verbose(chalk.grey('Running task "App"'));
+
+	// Grab all files, and copy over
+	// In --production mode, optimize them first
+	return gulp.src([
+			assetsFolder + '/app/**/*',
+			'!_*'
+		])
+		.pipe(plugins.plumber())
+		//.pipe(plugins.newer(config.export_assets + '/' + assetsFolder + '/images'))
+		.pipe(gulp.dest(config.export_assets + '/' + assetsFolder + '/app'))
 		.pipe(plugins.if(lrStarted, browserSync.reload({stream:true})))
 	;
 });
@@ -746,6 +769,12 @@ gulp.task('server', ['browsersync'], function (cb) {
 	gulp.watch([assetsFolder + '/js/**/view-*.js'], ['scripts-view', 'templates']).on('change', watchHandler);
 	gulp.watch([assetsFolder + '/js/**/*.js', '!**/view-*.js'], ['scripts-main', 'templates']).on('change', watchHandler);
 	gulp.watch([assetsFolder + '/images/**/*'], ['images']).on('change', watchHandler);
+	
+	//As this a angularJs app folder
+	if (config.angularApp) {
+		gulp.watch([assetsFolder + '/app/**/*'], ['appOther', 'templates']).on('change', watchHandler);
+	}
+	
 	gulp.watch(['templates/**/*'], ['templates']).on('change', watchHandler);
 
 	cb(null);
