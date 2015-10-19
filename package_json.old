@@ -43,7 +43,7 @@
     "gulp-rev-outdated": "^0.0.6",
     "gulp-rimraf": "^0.1.0",
     "gulp-ruby-sass": "^0.7.1",
-    "gulp-sass-graph": "*",
+    "gulp-sass-graph": "git://github.com/lox/gulp-sass-graph#828d8efbf1925a09ff9dd3157603f58506c8ae67",
     "gulp-strip-debug": "^1.0.1",
     "gulp-tap": "^0.1.1",
     "gulp-uglify": "^1.0.1",
